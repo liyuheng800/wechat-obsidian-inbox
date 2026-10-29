@@ -1,0 +1,78 @@
+# 知识库机器人配置。复制为 config.toml 后填写。
+
+# 消息通道：
+#   weixin = 普通微信（微信 ClawBot 官方插件）。不用填任何密钥，运行 bot.py --login 扫码绑定即可
+#   wecom  = 企业微信智能机器人（需要填下面 [wecom] 里的 Bot ID 和 Secret）
+channel = "weixin"
+
+# 是否走系统代理。微信和企业微信都是国内服务，保持 false（直连）即可，
+# 即使这台电脑开着代理或 VPN 软件也不受影响
+use_system_proxy = false
+
+[alert]
+# 告警和日报发到 QQ 邮箱。授权码不是 QQ 密码：
+# QQ 邮箱网页版 → 设置 → 账号与安全 → 安全设置 → 开启“POP3/SMTP 服务” → 生成授权码
+email = "填你的QQ邮箱，如 12345678@qq.com"
+auth_code = "填QQ邮箱授权码"
+to = ""            # 收件人，留空 = 发给自己
+
+[backup]
+dir = "~/kb-backups"   # 备份存放位置
+keep_days = 30         # 保留最近多少天
+hour = 3               # 每天几点后执行
+
+[monitor]
+daily_report_hour = 8  # 每天几点后发日报
+min_free_gb = 10       # 硬盘剩余空间低于多少 GB 告警
+
+[weixin]
+# 扫码绑定的那个微信默认就有权限，这里只需要填“额外”允许的用户（一般留空）
+allowed_users = []
+
+[wecom]
+# 仅 channel = "wecom" 时需要。企业微信后台 → 智能机器人 → API 模式 → 使用长连接
+bot_id = "填你的 Bot ID"
+secret = "填你的 Secret"
+allowed_users = []
+
+# 可选：userid → 名字。笔记的 author 字段会写名字，家人共用时能看出是谁记的
+[names]
+# "zhangsan" = "我"
+# "lisi" = "老婆"
+
+[vault]
+# Obsidian 知识库所在文件夹（Mac mini 上的路径）
+# 注意：不要放在“文稿 / 桌面 / 下载 / iCloud”里，后台程序会被 macOS 拦截
+path = "~/知识库"
+
+# 默认收件箱：每条消息存成一篇独立笔记，如 00-收件箱/2026-10-27 0915 今天学到的内容.md
+inbox_dir = "00-收件箱"
+
+# 图片、文件存放位置
+attachments_dir = "00-收件箱/附件"
+
+# ── 归档规则：从上到下，第一条命中的生效；都不命中就进收件箱 ──
+# tag：消息里出现这个标签就归档到 dir（标签会保留在笔记里，方便 Obsidian 搜索）
+# prefixes：消息以这些文字开头时归档，并自动补上标签
+
+[[routes]]
+name = "踩坑笔记"
+tag = "#踩坑"
+prefixes = ["踩坑：", "踩坑:"]
+dir = "01-学习/踩坑笔记"
+
+[[routes]]
+name = "工作日志"
+tag = "#工作"
+prefixes = ["工作：", "工作:"]
+dir = "02-工作/工作日志"
+
+[[routes]]
+name = "英语"
+tag = "#英语"
+dir = "01-学习/英语"
+
+[[routes]]
+name = "AI"
+tag = "#AI"
+dir = "01-学习/AI"

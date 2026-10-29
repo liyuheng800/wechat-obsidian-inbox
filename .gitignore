@@ -1,0 +1,15 @@
+# ⚠️ 以下文件含密钥或个人数据，绝不能提交
+config.toml
+weixin_token.json
+weixin_cursor.txt
+weixin-login-qr.svg
+state.json
+status.json
+monitor_state.json
+*.tmp
+
+# 运行环境
+.venv/
+__pycache__/
+*.pyc
+.DS_Store

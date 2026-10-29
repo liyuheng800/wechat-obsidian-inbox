@@ -1,0 +1,6 @@
+websockets>=15.0
+cryptography>=41.0
+certifi>=2024.0
+qrcode>=7.4
+pypng>=0.20220715
+tomli>=2.0; python_version < "3.11"
