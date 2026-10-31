@@ -174,30 +174,67 @@ def check_couchdb(fix=True):
     return Check("couchdb", "同步数据库", False, f"数据库无响应（{err}）。{fixed}")
 
 
-def tailscale_status():
+def tailscale_status(retries=3):
+    """返回 (tailscale 程序路径, status 字典或 None, 出错信息)。
+    只解析 stdout：tailscale 偶尔往 stderr 打警告（比如版本不一致），混进来会导致 JSON 解析失败。
+    命令行偶尔会超时或返回非 0（例如刚从睡眠唤醒），所以失败时隔几秒重试。"""
     ts = _first(TAILSCALE_CANDIDATES)
     if not ts:
-        return None, None
-    code, out = _run([ts, "status", "--json"])
-    if code != 0:
-        return ts, None
+        return None, None, ""
+    err = ""
+    for i in range(retries):
+        if i:
+            time.sleep(5)
+        try:
+            r = subprocess.run([ts, "status", "--json"], capture_output=True, text=True, timeout=30)
+        except Exception as e:
+            err = str(e)
+            continue
+        if r.returncode != 0:
+            err = (r.stderr or r.stdout or f"退出码 {r.returncode}").strip()
+            continue
+        try:
+            return ts, json.loads(r.stdout), ""
+        except ValueError:
+            err = "输出不是 JSON：" + (r.stdout or r.stderr or "").strip()[:120]
+    return ts, None, err[:200]
+
+
+def _ts_host(st=None):
+    """上次成功时记下 Mac mini 的域名；tailscale 命令失灵时用它直接测 HTTPS。"""
+    f = BASE_DIR / "tailscale_host.txt"
+    host = (((st or {}).get("Self") or {}).get("DNSName") or "").rstrip(".")
+    if host:
+        try:
+            if not f.exists() or f.read_text().strip() != host:
+                f.write_text(host)
+        except OSError:
+            pass
+        return host
     try:
-        return ts, json.loads(out)
-    except ValueError:
-        return ts, None
+        return f.read_text().strip()
+    except OSError:
+        return ""
 
 
 def check_tailscale(fix=True):
-    ts, st = tailscale_status()
+    ts, st, err = tailscale_status()
     if not ts:
         return Check("tailscale", "Tailscale", True, "未安装，跳过")
+    user, pw = _couch_cred()
+    host = _ts_host(st)
     if not st or st.get("BackendState") != "Running":
         state = st.get("BackendState") if st else "未知"
+        # 命令行查不到状态，但其他设备实际能连上数据库，就不算故障（最终目的是同步可用）
+        if st is None and user and host:
+            ok, _ = _http_ok(f"https://{host}/_up", user, pw, timeout=20)
+            if ok:
+                return Check("tailscale", "Tailscale", True,
+                             "在线（tailscale 命令暂时没有响应，但 HTTPS 访问数据库正常）")
+        why = f"；命令输出：{err}" if err else ""
         return Check("tailscale", "Tailscale", False,
-                     f"Tailscale 没有连接（状态：{state}）。请通过屏幕共享检查 Tailscale 是否已登录")
+                     f"Tailscale 没有连接（状态：{state}{why}）。请通过屏幕共享检查 Tailscale 是否已登录")
     detail = "在线"
-    user, pw = _couch_cred()
-    host = ((st.get("Self") or {}).get("DNSName") or "").rstrip(".")
     if user and host:
         url = f"https://{host}/_up"
         ok, err = _http_ok(url, user, pw, timeout=20)
@@ -215,7 +252,7 @@ def check_tailscale(fix=True):
 
 
 def check_tailscale_key():
-    _, st = tailscale_status()
+    _, st, _ = tailscale_status(retries=1)
     exp = ((st or {}).get("Self") or {}).get("KeyExpiry")
     if not exp:
         return Check("tailscale_key", "Tailscale 密钥", True, "不会过期" if st else "未知")

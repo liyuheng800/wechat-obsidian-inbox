@@ -237,6 +237,36 @@ async def main():
     assert time.time() - t0 < 5, "不应等到暂停结束"
     print("✓ 暂停期间手动重新绑定，立即恢复（无需重启）")
 
+    # ── 7. Tailscale 检查：stderr 警告不影响解析；命令失灵时以 HTTPS 实测为准 ──
+    fake = tmp / "fake-tailscale"
+    js = json.dumps({"BackendState": "Running", "Self": {"DNSName": "mini.example.ts.net."}})
+    mode = tmp / "ts-mode"
+    fake.write_text("#!/bin/sh\n"
+                    f"if [ \"$(cat {mode})\" = ok ]; then echo 'Warning: client version != tailscaled version' >&2; "
+                    f"echo '{js}'; exit 0; fi\n"
+                    "echo 'failed to connect to local Tailscale service' >&2; exit 1\n")
+    fake.chmod(0o755)
+    saved = (monitor.TAILSCALE_CANDIDATES, monitor._couch_cred, monitor._http_ok, monitor.time.sleep)
+    https_up = {"v": True}
+    monitor.TAILSCALE_CANDIDATES = [str(fake)]
+    monitor._couch_cred = lambda: ("u", "p")
+    monitor._http_ok = lambda url, *a, **k: (https_up["v"], "" if https_up["v"] else "timed out")
+    monitor.time.sleep = lambda s: None
+    try:
+        mode.write_text("ok")
+        c = monitor.check_tailscale(fix=False)
+        assert c.ok and c.detail == "在线", c
+        assert (tmp / "tailscale_host.txt").read_text() == "mini.example.ts.net"
+        mode.write_text("fail")
+        c = monitor.check_tailscale(fix=False)
+        assert c.ok and "HTTPS 访问数据库正常" in c.detail, c
+        https_up["v"] = False
+        c = monitor.check_tailscale(fix=False)
+        assert not c.ok and "failed to connect" in c.detail, c
+    finally:
+        monitor.TAILSCALE_CANDIDATES, monitor._couch_cred, monitor._http_ok, monitor.time.sleep = saved
+    print("✓ Tailscale：忽略 stderr 警告、命令失灵时重试并以 HTTPS 实测为准")
+
     smtp.stop()
     srv.shutdown()
     print("\n✅ 运维功能测试全部通过")

@@ -13,3 +13,4 @@ monitor_state.json
 __pycache__/
 *.pyc
 .DS_Store
+tailscale_host.txt
