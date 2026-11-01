@@ -46,7 +46,7 @@ flowchart LR
 > 需要：一台 macOS 15 以上、长期开机的 Mac（Apple 芯片），以及**支持 ClawBot 插件的微信**（我 → 设置 → 插件 → 微信 ClawBot）。
 
 ```bash
-git clone https://github.com/liyuheng800/wechat-obsidian-inbox.git ~/wechat-obsidian-inbox
+git clone <本仓库地址> ~/wechat-obsidian-inbox
 cd ~/wechat-obsidian-inbox
 ./livesync/setup-livesync.sh   # 可选：安装多设备同步用的 CouchDB（需要先装好 Homebrew 和 Tailscale）
 ./install.sh                   # 第一次运行会生成 config.toml；确认知识库路径后再运行一次，用微信扫码绑定
@@ -58,7 +58,7 @@ cd ~/wechat-obsidian-inbox
 
 | 文档 | 内容 |
 |---|---|
-| [搭建全记录](docs/guide.zh-CN.md) | 需求、选型过程、架构、用到的软件、完整搭建步骤（带截图）、12 条踩坑记录 |
+| [搭建全记录](docs/guide.zh-CN.md) | 需求、选型过程、架构、用到的软件、完整搭建步骤（带截图）、13 条踩坑记录 |
 | [使用说明](docs/usage.zh-CN.md) | 指令列表、自定义归档规则、备份和告警、常用命令、排错 |
 
 ## 许可

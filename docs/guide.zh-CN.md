@@ -397,6 +397,11 @@ open -e config.toml   # 确认 [vault] 里的 path 是你的知识库路径
 **12. 同步不等于备份**
 - LiveSync 会把误删或者改坏的内容同步到所有设备。所以加了每日打包备份，有条件的话再接一块移动硬盘开 Time Machine
 
+**13. 大视频只在 Mac mini 上有，别的设备收不到**
+- 现象：微信发了一段 20 多分钟的视频，Mac mini 上能看到，MacBook 上只有笔记，点开链接反而生成了一个空的 `xxx.mp4.md`
+- 原因：LiveSync 默认**跳过 50 MB 以上的文件**（设置项 Maximum file size），超过的既不上传也不下载，而且不会提示
+- 解决：每台设备都打开 设置 → General → Enable advanced features，再到 🚦 Selector → Normal Files 把 Maximum file size 调大（比如 1024）。大视频会在每台设备和数据库里各存一份，空间紧张的话宁可保持限制
+
 ---
 
 ## 九、安全与隐私

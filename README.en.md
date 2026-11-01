@@ -46,7 +46,7 @@ See the [guide's hardware and software section](docs/guide.en.md#4-hardware-and-
 > You need an always-on Mac on macOS 15+ (Apple silicon) and a **WeChat version with the ClawBot plugin** (Me → Settings → Plugins → WeChat ClawBot).
 
 ```bash
-git clone https://github.com/liyuheng800/wechat-obsidian-inbox.git ~/wechat-obsidian-inbox
+git clone <this repository> ~/wechat-obsidian-inbox
 cd ~/wechat-obsidian-inbox
 ./livesync/setup-livesync.sh   # optional: CouchDB for multi-device sync (needs Homebrew and Tailscale)
 ./install.sh                   # first run creates config.toml; check the vault path, run again, scan the QR code with WeChat
@@ -60,7 +60,7 @@ Full walkthrough — Obsidian/LiveSync setup, alert email, adding devices — in
 
 | Doc | Contents |
 |---|---|
-| [Guide](docs/guide.en.md) | Requirements, options evaluated, architecture, software, step-by-step setup with screenshots, 12 pitfalls |
+| [Guide](docs/guide.en.md) | Requirements, options evaluated, architecture, software, step-by-step setup with screenshots, 13 pitfalls |
 | [Usage](docs/usage.en.md) | Commands, routing rules, backups and alerts, maintenance, troubleshooting |
 
 ## License

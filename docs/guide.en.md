@@ -406,6 +406,11 @@ The most time-consuming part. All are fixed in the code; documented here for ref
 **12. Sync is not backup**
 - LiveSync faithfully propagates accidental deletions or corruption to every device. Hence the daily archive backups; ideally add Time Machine to an external drive too
 
+**13. A long video showed up only on the Mac mini**
+- Symptom: a 20-minute video sent from WeChat was on the Mac mini; the MacBook only had the note, and clicking the link created an empty `xxx.mp4.md`
+- Cause: LiveSync **skips files over 50 MB** by default (the Maximum file size setting) — silently, in both directions
+- Fix: on every device enable Settings → General → Enable advanced features, then raise 🚦 Selector → Normal Files → Maximum file size (e.g. 1024). Big videos are then stored on every device plus the database, so keep the limit if space is tight
+
 ---
 
 ## 9. Security and privacy
